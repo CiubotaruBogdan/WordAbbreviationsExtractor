@@ -1,0 +1,78 @@
+Sub ExtractCapsWordsAndAbbreviations()
+    Dim doc As Document
+    Dim para As Paragraph
+    Dim wordArr() As String
+    Dim i As Long
+    Dim uniqueWords As New Collection
+    
+    Set doc = ActiveDocument
+    
+    On Error Resume Next ' Ignore errors for duplicate keys
+    For Each para In doc.Paragraphs
+        wordArr = Split(para.Range.Text, " ")
+        
+        For i = LBound(wordArr) To UBound(wordArr)
+            Dim word As String
+            word = TrimSpecial(wordArr(i))
+            
+            If Len(word) >= 3 And CountUpperCase(word) >= 2 Then
+                uniqueWords.Add word, CStr(word)
+            End If
+        Next i
+    Next para
+    On Error GoTo 0 ' Reset error handling to default behavior
+    
+    ' Create a new document and set its name to "Abbreviations"
+    Set newDoc = Documents.Add
+    newDoc.SaveAs "Abbreviations"
+    
+    ' Add a 2-column table to the new document
+    Dim tbl As Table
+    Set tbl = newDoc.Tables.Add(newDoc.Range, 1, 2)
+    
+    ' Set table borders to black and 1px wide
+    With tbl.Borders
+        .OutsideLineStyle = wdLineStyleSingle
+        .OutsideColor = wdColorBlack
+        .InsideLineStyle = wdLineStyleSingle
+        .InsideColor = wdColorBlack
+    End With
+    
+    ' Populate the first column of the table with the unique words
+    Dim row As Integer
+    row = 1
+    Dim w As Variant
+    For Each w In uniqueWords
+        tbl.Cell(row, 1).Range.Text = w
+        tbl.Rows.Add
+        row = row + 1
+    Next w
+    
+    ' Remove the last, empty row added
+    tbl.Rows.Last.Delete
+End Sub
+
+Function CountUpperCase(str As String) As Integer
+    Dim i As Long
+    Dim count As Integer
+    count = 0
+    For i = 1 To Len(str)
+        If Mid(str, i, 1) Like "[A-Z]" Then
+            count = count + 1
+        End If
+    Next i
+    CountUpperCase = count
+End Function
+
+Function TrimSpecial(str As String) As String
+    Dim i As Long
+    Dim result As String
+    result = ""
+    For i = 1 To Len(str)
+        If Mid(str, i, 1) Like "[A-Za-z]" Then
+            result = result & Mid(str, i, 1)
+        End If
+    Next i
+    TrimSpecial = result
+End Function
+
