@@ -26,7 +26,7 @@ This repository contains a macro that scans through a Microsoft Word document to
 
 ## Installation
 
-1. Download the `.docm` or `.dotm` file containing the macro from this repository.
+1. Download the file containing the macro from this repository.
 2. Open the document in Microsoft Word.
 3. If prompted, enable macros to allow the script to run.
 
